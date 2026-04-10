@@ -3594,7 +3594,7 @@ let _favorites = (function loadFavs(){
 function toggleFav(id,btn){
   if(_favorites.has(id)){_favorites.delete(id);}
   else{_favorites.add(id);}
-  try{localStorage.setItem('wpFavorites',JSON.stringify([..._favorites]));localStorage.setItem('wpFavUpdatedAt',Date.now().toString());}catch(e){}
+  try{localStorage.setItem('wpFavorites',JSON.stringify([..._favorites]));}catch(e){}
   schedulePush();
   // Update this button in place
   if(btn){
@@ -3925,6 +3925,8 @@ async function pushToCloud() {
   if (!_syncClient || !_syncUser) return;
   _setSyncStatus('syncing');
   try {
+    await pullFromCloud(true);
+    if (!_syncUser) { _setSyncStatus('idle'); return; }
     const payload = _getLocalPayload();
     const { error } = await _syncClient.from('wikipad_sync').upsert(
       { user_id: _syncUser.id, ...payload, updated_at: new Date().toISOString() },
@@ -4022,14 +4024,12 @@ function _applyCloudData(data) {
       updateProg();
     }
   }
-  // Favorites — last-write-wins: only apply cloud if cloud is newer than last local change
+  // Favorites — union: a note favorited anywhere stays favorited
   if (Array.isArray(data.favorites)) {
-    const localTs = parseInt(localStorage.getItem('wpFavUpdatedAt') || '0');
-    const cloudTs = data.updated_at ? new Date(data.updated_at).getTime() : 0;
-    if (cloudTs > localTs) {
-      localStorage.setItem('wpFavorites', JSON.stringify(data.favorites));
-      _favorites = new Set(data.favorites);
-    }
+    const localFavs = (() => { try { return JSON.parse(localStorage.getItem('wpFavorites') || '[]'); } catch(e) { return []; } })();
+    const merged = [...new Set([...localFavs, ...data.favorites])];
+    localStorage.setItem('wpFavorites', JSON.stringify(merged));
+    _favorites = new Set(merged);
   }
   // Section renames — cloud wins
   if (data.section_renames && typeof data.section_renames === 'object') {
@@ -4071,7 +4071,7 @@ function updateSyncUI() {
   const panelStatusText = document.getElementById('sync-panel-status-text');
   const syncIcons = {
     synced:  `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#36b37e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="5.5"/><polyline points="4.5,7 6.2,9 9.5,5"/></svg>`,
-    syncing: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#f0a500" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="animation:sync-spin .9s linear infinite;transform-origin:7px 7px"><path d="M11.5 7A4.5 4.5 0 1 1 7 2.5"/><polyline points="4.5,1.2 7,2.5 4.5,3.8"/></svg>`,
+    syncing: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#f0a500" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="animation:sync-spin .9s linear infinite;transform-origin:7px 7px"><path d="M11.5 7a4.5 4.5 0 1 1-.93-2.77"/><polyline points="11.5,1.5 11.5,4.5 8.5,4.5"/></svg>`,
     error:   `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#cc3333" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="5.5"/><line x1="7" y1="4.5" x2="7" y2="7.5"/><circle cx="7" cy="9.5" r=".6" fill="#cc3333" stroke="none"/></svg>`,
     idle:    `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#a2a9b1" stroke-width="1.8" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><line x1="4.5" y1="7" x2="9.5" y2="7"/></svg>`
   };
