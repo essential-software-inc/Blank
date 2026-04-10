@@ -6,7 +6,6 @@
 <title>Blank</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-button,a{touch-action:manipulation}
 html{font-size:16px;scroll-behavior:smooth}
 body{font-family:Georgia,'Times New Roman',Times,serif;color:#202122;background:#fff;line-height:1.6;overflow-x:hidden}
 a{color:#3366cc;text-decoration:none}
@@ -441,11 +440,9 @@ body.night .ebtn-pri:disabled{background:#2d3240;border-color:#3a4050;opacity:.6
 .md-pills-bar{display:flex;gap:.28rem;overflow-x:auto;padding:.28rem .8rem .22rem;border-top:1px solid #eaecf0;background:#f4f5f7;flex-shrink:0;scrollbar-width:none;-ms-overflow-style:none}
 .md-pills-bar::-webkit-scrollbar{display:none}
 .md-pill{flex-shrink:0;border:1px solid #d0d3d8;border-radius:12px;padding:.14rem .52rem;font-size:.68rem;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;cursor:pointer;color:#44505e;background:#fff;white-space:nowrap;user-select:none;-webkit-user-select:none;transition:background .12s,border-color .12s,color .12s}
-.md-pill:hover{background:#eaf3fb;border-color:#3366cc;color:#3366cc}
 .md-pill:active{background:#dbe8f8;border-color:#2255aa}
 body.night .md-pills-bar{background:#141820;border-color:#2d3240}
 body.night .md-pill{background:#1a1d24;border-color:#3a4050;color:#8a9ab0}
-body.night .md-pill:hover{background:#1e2a3a;border-color:#74b0ff;color:#74b0ff}
 
 /* Edit footer icon buttons (download/upload) */
 .eftr-icon{background:none;border:1px solid #d0d3d8;border-radius:8px;padding:.3rem .4rem;cursor:pointer;color:#54595d;display:inline-flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
@@ -519,9 +516,11 @@ body.night #ph-overview{border-color:#2d3240}
 body.night #ph-overview .ov-hdr{background:#252a35}
 body.night #ph-overview .ov-ttl{color:#c8ccd1}
 
+@media(hover:hover) and (pointer:fine){
 .guide-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.1);border-color:#3366cc}
 body.night .guide-card:hover{border-color:#74b0ff;box-shadow:0 2px 8px rgba(0,0,0,.35)}
-@media(hover:hover){
+.md-pill:hover{background:#eaf3fb;border-color:#3366cc;color:#3366cc}
+body.night .md-pill:hover{background:#1e2a3a;border-color:#74b0ff;color:#74b0ff}
 a:hover{text-decoration:underline}
 .copy-btn:hover{opacity:1;background:#eaf3fb;border-color:#3366cc;color:#3366cc}
 #menu-btn:hover{background:#eaecf0}
@@ -600,7 +599,37 @@ body.night #back-btn:hover{background:#1e2a3a}
 body.night #sync-btn:hover{background:#252a35}
 .auth-provider-btn:hover{background:#f4f5f7;border-color:#a2a9b1}
 body.night .auth-provider-btn:hover{background:#2d3448;border-color:#4a5060}
+.sync-panel-btn:hover{background:#f4f5f7}
+.sync-panel-btn--danger:hover{background:#fff0f0;color:#cc3333}
+body.night .sync-panel-btn:hover{background:#252a35}
+body.night .sync-panel-btn--danger:hover{background:#2a1010}
+#auth-closebtn:hover{background:#d0d3d8}
+body.night #auth-closebtn:hover{background:#3a4050}
 }
+/* ── Active states: instant tap feedback on all devices ── */
+.hdr-btn:active,#menu-btn:active,#sync-btn:active,#back-btn:active,#back-top:active{background:#d8dce4;transition:none}
+body.night .hdr-btn:active,body.night #menu-btn:active,body.night #sync-btn:active,body.night #back-btn:active{background:#2d3448;transition:none}
+.rdlg-cancel:active{background:#d8dce4;transition:none}
+.rdlg-ok:active{background:#a01818;transition:none}
+.rdlg-ok--blue:active{background:#1e44aa;transition:none}
+.ebtn-sec:active{background:#e0e2e5;transition:none}
+.ebtn-pri:active{background:#1e44aa;transition:none}
+.ebtn-exp:active{background:#d5f5e0;transition:none}
+.auth-provider-btn:active{background:#e8eaed;border-color:#8a9090;transition:none}
+body.night .auth-provider-btn:active{background:#1a2030;transition:none}
+#auth-closebtn:active{background:#c0c4c8;transition:none}
+body.night #auth-closebtn:active{background:#4a5060;transition:none}
+.sync-panel-btn:active{background:#e8eaed;transition:none}
+.sync-panel-btn--danger:active{background:#ffe0e0;transition:none}
+body.night .sync-panel-btn:active{background:#1a2030;transition:none}
+#privacy-closebtn:active,#md-help-closebtn:active{background:#c0c4c8;transition:none}
+.phase-hdr:active{background:#cdd3da;transition:none}
+.day-hdr:active{background:#d5e8f8;transition:none}
+.step-hdr:active{background:#eef0f2;transition:none}
+.trouble-hdr:active{background:#ede8c0;transition:none}
+.snav-btn:active{background:#d5e5f8;border-color:#2255aa;transition:none}
+.eftr-icon:active{background:#d5e5f8;border-color:#2255aa;color:#2255aa;transition:none}
+.guide-card:active{box-shadow:0 1px 4px rgba(0,0,0,.08);border-color:#2255aa;transition:none}
 /* ── Cloud Sync ── */
 #sync-btn-wrap{position:relative;display:inline-flex;align-items:center}
 #sync-btn{background:none;border:none;cursor:pointer;padding:.3rem .35rem;display:flex;align-items:center;justify-content:center;border-radius:3px;transition:background .15s;line-height:1;position:relative}
@@ -616,18 +645,13 @@ body.night #sync-status-dot{border-color:#1a1d24}
 #sync-panel-status-row{padding:.32rem .8rem;font-size:.72rem;color:#72777d;display:flex;align-items:center;gap:.35rem;border-bottom:1px solid #eaecf0}
 @keyframes sync-pulse{0%,100%{transform:scale(.55);opacity:.5}50%{transform:scale(1);opacity:1}}
 .sync-panel-btn{display:block;width:100%;text-align:left;background:none;border:none;padding:.42rem .8rem;font-size:.82rem;font-family:sans-serif;cursor:pointer;color:#202122;transition:background .1s}
-.sync-panel-btn:hover{background:#f4f5f7}
-.sync-panel-btn--danger{color:#cc3333}
-.sync-panel-btn--danger:hover{background:#fff0f0;color:#cc3333}
 body.night #sync-panel{background:#1a1d24;border-color:#2d3240;box-shadow:0 4px 20px rgba(0,0,0,.45)}
 body.night #sync-panel-hdr{border-color:#2d3240}
 body.night #sync-panel-name{color:#c8ccd1}
 body.night #sync-panel-email{color:#5a6070}
 body.night #sync-panel-status-row{border-color:#2d3240;color:#5a6070}
 body.night .sync-panel-btn{color:#c8ccd1}
-body.night .sync-panel-btn:hover{background:#252a35}
 body.night .sync-panel-btn--danger{color:#ff7070}
-body.night .sync-panel-btn--danger:hover{background:#2a1010}
 #auth-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center}
 #auth-overlay.open{display:flex}
 #reauth-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center}
@@ -636,16 +660,14 @@ body.night .sync-panel-btn--danger:hover{background:#2a1010}
 #auth-dhdr{padding:.75rem .9rem .6rem;border-bottom:1px solid #eaecf0;display:flex;align-items:center}
 #auth-dhdr-title{font-size:.92rem;font-weight:bold;color:#202122;flex:1}
 #auth-closebtn{background:#eaecf0;border:none;cursor:pointer;color:#54595d;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;transition:background .12s}
-#auth-closebtn:hover{background:#d0d3d8}
 #auth-body{padding:1rem .9rem 1.25rem}
 #auth-body p{font-size:.82rem;color:#54595d;margin:0 0 1rem;line-height:1.5}
-.auth-provider-btn{display:flex;align-items:center;justify-content:center;gap:.65rem;width:100%;border:1px solid #d0d3d8;border-radius:10px;padding:.55rem .85rem;font-size:.84rem;font-family:sans-serif;cursor:pointer;color:#202122;background:#fff;margin-bottom:.5rem;transition:background .12s,border-color .12s;box-sizing:border-box}
+.auth-provider-btn{display:flex;align-items:center;justify-content:center;gap:.65rem;width:100%;border:1px solid #d0d3d8;border-radius:10px;padding:.55rem .85rem;font-size:.84rem;font-family:sans-serif;cursor:pointer;color:#202122;background:#fff;margin-bottom:.5rem;transition:background .12s,border-color .12s;box-sizing:border-box;touch-action:manipulation}
 .auth-provider-btn:last-child{margin-bottom:0}
 body.night #auth-dialog{background:#1a1d24;border:1px solid #2d3240}
 body.night #auth-dhdr{border-color:#2d3240}
 body.night #auth-dhdr-title{color:#c8ccd1}
 body.night #auth-closebtn{background:#252a35;color:#9aa0b0}
-body.night #auth-closebtn:hover{background:#3a4050}
 body.night #auth-body p{color:#7a8090}
 body.night .auth-provider-btn{background:#252a35;border-color:#3a4050;color:#c8ccd1}
 </style>
