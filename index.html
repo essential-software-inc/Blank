@@ -594,14 +594,13 @@ body.night .gc-dropdown button:hover{background:#2a1010}
 body.night .gc-fav:hover svg{transform:scale(1.18)}
 #back-btn:hover{background:#eaf3fb}
 body.night #back-btn:hover{background:#1e2a3a}
-#sync-btn:hover{background:#eaecf0}
-#sync-btn:has(.sync-icon-initial[style*="flex"]):hover{background:none}
-body.night #sync-btn:hover{background:#252a35}
 }
 /* ── Cloud Sync ── */
 #sync-btn-wrap{position:relative;display:inline-flex;align-items:center}
 #sync-btn{background:none;border:none;cursor:pointer;padding:.3rem .35rem;display:flex;align-items:center;justify-content:center;border-radius:3px;transition:background .15s;line-height:1;position:relative}
+#sync-btn:hover{background:#eaecf0}#sync-btn:has(.sync-icon-initial[style*="flex"]):hover{background:none}
 body.night #sync-btn{color:#c8ccd1}
+body.night #sync-btn:hover{background:#252a35}
 .sync-icon-initial{width:20px;height:20px;border-radius:50%;background:#3366cc;color:#fff;font-size:.65rem;font-family:sans-serif;font-weight:bold;display:none;align-items:center;justify-content:center;line-height:1}
 #sync-status-dot{display:none;position:absolute;top:2px;right:2px;width:7px;height:7px;border-radius:50%;pointer-events:none;border:1.5px solid #fff}
 body.night #sync-status-dot{border-color:#1a1d24}
@@ -648,27 +647,7 @@ body.night #auth-body p{color:#7a8090}
 body.night .auth-provider-btn{background:#252a35;border-color:#3a4050;color:#c8ccd1}
 body.night .auth-provider-btn:hover{background:#2d3448;border-color:#4a5060}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
-// 🔄 Debounced auto-sync
-let syncTimeout = null;
-function scheduleSync() {
-  if (syncTimeout) clearTimeout(syncTimeout);
-  syncTimeout = setTimeout(() => {
-    scheduleSync();
-  }, 500); // adjust debounce as needed
-}
-
-// 👁️ Pull on focus (when user returns to app)
-window.addEventListener('focus', () => {
-  if (_syncClient && _syncUser) pullFromCloud();
-});
-
-// 📱 Pull on visibility change (mobile-friendly)
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && _syncClient && _syncUser) pullFromCloud();
-});
-
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
