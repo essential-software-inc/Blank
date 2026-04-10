@@ -4102,17 +4102,19 @@ async function syncSignInWith(provider) {
 }
 
 async function syncSignOut() {
-  if (!_syncClient) return;
   const panel = document.getElementById('sync-panel');
   if (panel) panel.classList.remove('open');
-  // Kill the stale outside-click listener that would otherwise eat the first
-  // click on the auth overlay after the user tries to sign back in.
   document.removeEventListener('click', _closeSyncPanelOutside, { capture: true });
-  _syncUser = null;
-  _setSyncStatus('idle');
-  try { await _syncClient.auth.signOut({ scope: 'local' }); } catch(e) { console.warn('Sign-out error:', e); }
-  localStorage.removeItem('wpSyncPushedAt');
-  window.location.reload(); // always reloads, even if signOut() hangs or throws
+  // Sign out server-side (full scope) so the token is invalidated for any email.
+  // Don't gate on _syncClient being truthy — attempt regardless so stale tokens
+  // can't linger and block a different user signing in on the same device.
+  try { if (_syncClient) await _syncClient.auth.signOut(); } catch(e) { console.warn('Sign-out error:', e); }
+  // Hard reset: wipe all app state so there's zero stale data before the next sign-in.
+  // sessionStorage is cleared too in case any auth tokens landed there.
+  try { localStorage.clear(); } catch(e) {}
+  try { sessionStorage.clear(); } catch(e) {}
+  // Force a hard reload (bypasses browser cache) so no in-memory JS state survives.
+  window.location.href = window.location.href.split('?')[0].split('#')[0];
 }
 
 async function syncNow() {
