@@ -610,7 +610,8 @@ body.night #sync-status-dot{border-color:#1a1d24}
 #sync-panel-name{font-size:.82rem;font-weight:bold;color:#202122;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #sync-panel-email{font-size:.72rem;color:#72777d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.08rem}
 #sync-panel-status-row{padding:.32rem .8rem;font-size:.72rem;color:#72777d;display:flex;align-items:center;gap:.35rem;border-bottom:1px solid #eaecf0}
-.sync-panel-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+@keyframes sync-spin{to{transform:rotate(360deg)}}
+#sync-panel-icon svg{display:block}
 .sync-panel-btn{display:block;width:100%;text-align:left;background:none;border:none;padding:.42rem .8rem;font-size:.82rem;font-family:sans-serif;cursor:pointer;color:#202122;transition:background .1s}
 .sync-panel-btn:hover{background:#f4f5f7}
 .sync-panel-btn--danger{color:#cc3333}
@@ -686,7 +687,7 @@ document.addEventListener('visibilitychange', () => {
         <div id="sync-panel-email"></div>
       </div>
       <div id="sync-panel-status-row">
-        <span class="sync-panel-dot" id="sync-panel-dot"></span>
+        <span id="sync-panel-icon" style="display:flex;align-items:center;flex-shrink:0"></span>
         <span id="sync-panel-status-text">—</span>
       </div>
       <button class="sync-panel-btn" onclick="syncNow()">Sync now</button>
@@ -4060,12 +4061,17 @@ function updateSyncUI() {
     if (initial) initial.style.display = 'none';
     btn.title = 'Sign in to sync across devices';
   }
-  const panelDot = document.getElementById('sync-panel-dot');
+  const panelIcon = document.getElementById('sync-panel-icon');
   const panelStatusText = document.getElementById('sync-panel-status-text');
-  const statusMap = { synced: ['#36b37e', '✓ Synced'], syncing: ['#f0a500', '⟳ Syncing…'], error: ['#cc3333', 'Sync error — tap to retry'], idle: ['#a2a9b1', 'Not synced'] };
-  const [dotCol, txt] = statusMap[_syncStatus] || statusMap.idle;
-  if (panelDot) panelDot.style.background = dotCol;
-  if (panelStatusText) panelStatusText.textContent = txt;
+  const syncIcons = {
+    synced: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#36b37e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="6"/><polyline points="4,7 6,9.5 10,5"/></svg>`,
+    syncing: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#f0a500" stroke-width="1.8" stroke-linecap="round" style="animation:sync-spin .9s linear infinite"><path d="M7 2a5 5 0 1 1-3.54 1.46"/><polyline points="7,2 7,4.5 9,3"/></svg>`,
+    error: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#cc3333" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="6"/><line x1="7" y1="4.5" x2="7" y2="7.5"/><circle cx="7" cy="9.5" r=".6" fill="#cc3333"/></svg>`,
+    idle: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#a2a9b1" stroke-width="1.8" stroke-linecap="round"><circle cx="7" cy="7" r="6"/><line x1="4.5" y1="7" x2="9.5" y2="7"/></svg>`
+  };
+  const statusLabels = { synced: 'Synced', syncing: 'Syncing…', error: 'Sync error — tap to retry', idle: 'Not synced' };
+  if (panelIcon) panelIcon.innerHTML = syncIcons[_syncStatus] || syncIcons.idle;
+  if (panelStatusText) panelStatusText.textContent = statusLabels[_syncStatus] || statusLabels.idle;
 }
 
 function openSyncPanel() {
