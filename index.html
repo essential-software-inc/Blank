@@ -606,9 +606,19 @@ body.night .sync-panel-btn--danger:hover{background:#2a1010}
 #auth-closebtn:hover{background:#d0d3d8}
 body.night #auth-closebtn:hover{background:#3a4050}
 }
-/* ── No hover on touch devices for sync btn (person icon + blue circle) ── */
-@media(hover:none){
-#sync-btn:hover,body.night #sync-btn:hover{background:none}
+/* ── Suppress hover effects on touch / coarse-pointer devices ── */
+@media(hover:none),(pointer:coarse){
+#sync-btn:hover,body.night #sync-btn:hover,
+.hdr-btn:hover,body.night .hdr-btn:hover,
+#menu-btn:hover,body.night #menu-btn:hover,
+#back-btn:hover,body.night #back-btn:hover,
+.sync-panel-btn:hover,body.night .sync-panel-btn:hover{background:none}
+.sync-panel-btn--danger:hover{background:none;color:#202122}
+body.night .sync-panel-btn--danger:hover{background:none;color:#ff7070}
+#auth-closebtn:hover{background:#eaecf0}
+body.night #auth-closebtn:hover{background:#252a35}
+.auth-provider-btn:hover{background:#fff;border-color:#d0d3d8}
+body.night .auth-provider-btn:hover{background:#252a35;border-color:#3a4050}
 }
 /* ── Active states: instant tap feedback on all devices ── */
 .hdr-btn:active,#menu-btn:active,#sync-btn:active,#back-btn:active,#back-top:active{background:#d8dce4;transition:none}
@@ -3886,9 +3896,8 @@ let _syncStatus = 'idle'; // idle | syncing | synced | error
       _syncUser = session.user;
       updateSyncUI();
       await pullFromCloud();
-    } else if ((event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') && session) {
-      _syncUser = session.user; // keep user reference current after token refresh or account switch
-      if (event === 'USER_UPDATED') updateSyncUI(); // USER_UPDATED fires on account switch; reflect new identity immediately
+    } else if (event === 'TOKEN_REFRESHED' && session) {
+      _syncUser = session.user; // keep user reference current after token refresh
     } else if (event === 'SIGNED_OUT') {
       _syncUser = null;
       localStorage.removeItem('wpSyncPushedAt');
