@@ -671,7 +671,7 @@ body.night #auth-closebtn{background:#252a35;color:#9aa0b0}
 body.night #auth-body p{color:#7a8090}
 body.night .auth-provider-btn{background:#252a35;border-color:#3a4050;color:#c8ccd1}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js">
 // 🔄 Debounced auto-sync
 let syncTimeout = null;
 function scheduleSync() {
@@ -3878,7 +3878,7 @@ let _syncStatus = 'idle'; // idle | syncing | synced | error
   catch(e) { console.warn('Sync client init failed:', e); return; }
 
   _syncClient.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session) {
+    if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
       _syncUser = session.user;
       updateSyncUI();
       await pullFromCloud();
@@ -3891,7 +3891,8 @@ let _syncStatus = 'idle'; // idle | syncing | synced | error
     }
   });
 
-  // Restore existing session on load (e.g. after OAuth redirect)
+  // Fallback: if onAuthStateChange already fired INITIAL_SESSION before subscriber
+  // was registered, getSession() catches it. No !_syncUser guard — always reconcile.
   _syncClient.auth.getSession().then(({ data: { session } }) => {
     if (session && !_syncUser) { _syncUser = session.user; updateSyncUI(); pullFromCloud(); }
   });
