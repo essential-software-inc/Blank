@@ -597,6 +597,8 @@ body.night #back-btn:hover{background:#1e2a3a}
 #sync-btn:hover{background:#eaecf0}
 #sync-btn:has(.sync-icon-initial[style*="flex"]):hover{background:none}
 body.night #sync-btn:hover{background:#252a35}
+.auth-provider-btn:hover{background:#f4f5f7;border-color:#a2a9b1}
+body.night .auth-provider-btn:hover{background:#2d3448;border-color:#4a5060}
 }
 /* ── Cloud Sync ── */
 #sync-btn-wrap{position:relative;display:inline-flex;align-items:center}
@@ -636,9 +638,8 @@ body.night .sync-panel-btn--danger:hover{background:#2a1010}
 #auth-closebtn:hover{background:#d0d3d8}
 #auth-body{padding:1rem .9rem 1.25rem}
 #auth-body p{font-size:.82rem;color:#54595d;margin:0 0 1rem;line-height:1.5}
-.auth-provider-btn{display:flex;align-items:center;justify-content:center;gap:.65rem;width:100%;border:1px solid #d0d3d8;border-radius:10px;padding:.55rem .85rem;font-size:.84rem;font-family:sans-serif;cursor:pointer;color:#202122;background:#fff;margin-bottom:.5rem;transition:background .12s,border-color .12s;box-sizing:border-box}
+.auth-provider-btn{display:flex;align-items:center;justify-content:center;gap:.65rem;width:100%;border:1px solid #d0d3d8;border-radius:10px;padding:.55rem .85rem;font-size:.84rem;font-family:sans-serif;cursor:pointer;color:#202122;background:#fff;margin-bottom:.5rem;transition:background .12s,border-color .12s;box-sizing:border-box;touch-action:manipulation}
 .auth-provider-btn:last-child{margin-bottom:0}
-.auth-provider-btn:hover{background:#f4f5f7;border-color:#a2a9b1}
 body.night #auth-dialog{background:#1a1d24;border:1px solid #2d3240}
 body.night #auth-dhdr{border-color:#2d3240}
 body.night #auth-dhdr-title{color:#c8ccd1}
@@ -646,7 +647,6 @@ body.night #auth-closebtn{background:#252a35;color:#9aa0b0}
 body.night #auth-closebtn:hover{background:#3a4050}
 body.night #auth-body p{color:#7a8090}
 body.night .auth-provider-btn{background:#252a35;border-color:#3a4050;color:#c8ccd1}
-body.night .auth-provider-btn:hover{background:#2d3448;border-color:#4a5060}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
 // 🔄 Debounced auto-sync
@@ -4071,11 +4071,11 @@ function updateSyncUI() {
   const panelStatusText = document.getElementById('sync-panel-status-text');
   const syncIcons = {
     synced:  `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#36b37e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="5.5"/><polyline points="4.5,7 6.2,9 9.5,5"/></svg>`,
-    syncing: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#f0a500" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="animation:sync-spin .9s linear infinite;transform-origin:7px 7px"><path d="M11.5 7A4.5 4.5 0 1 1 7 2.5"/><polyline points="4.5,1.2 7,2.5 4.5,3.8"/></svg>`,
+    syncing: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#f0a500" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="animation:sync-spin .9s linear infinite;transform-origin:7px 7px"><path d="M7 2.5A4.5 4.5 0 1 1 2.5 7"/><polyline points="1.2,5.5 2.5,7 3.8,5.5"/></svg>`,
     error:   `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#cc3333" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="5.5"/><line x1="7" y1="4.5" x2="7" y2="7.5"/><circle cx="7" cy="9.5" r=".6" fill="#cc3333" stroke="none"/></svg>`,
     idle:    `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#a2a9b1" stroke-width="1.8" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><line x1="4.5" y1="7" x2="9.5" y2="7"/></svg>`
   };
-  const statusLabels = { synced: 'Synced', syncing: 'Syncing…', error: 'Sync error — tap to retry', idle: 'Not synced' };
+  const statusLabels = { synced: 'Synced', syncing: 'Syncing…', error: 'Sync error', idle: 'Not synced' };
   if (panelIcon) panelIcon.innerHTML = syncIcons[_syncStatus] || syncIcons.idle;
   if (panelStatusText) panelStatusText.textContent = statusLabels[_syncStatus] || statusLabels.idle;
 }
@@ -4093,8 +4093,11 @@ function openSyncPanel() {
     panel.classList.add('open');
     setTimeout(() => document.addEventListener('click', _closeSyncPanelOutside, { once: true, capture: true }), 0);
   } else {
-    document.getElementById('auth-overlay').classList.add('open');
+    const ov = document.getElementById('auth-overlay');
+    ov.classList.add('open');
     lockScroll();
+    _authModalReady = false;
+    setTimeout(() => { _authModalReady = true; }, 400);
   }
 }
 
@@ -4110,8 +4113,10 @@ function _closeSyncPanelOutside(e) {
   }
 }
 
+let _authModalReady = false;
 function closeAuthModal() {
   document.getElementById('auth-overlay').classList.remove('open');
+  _authModalReady = false;
   unlockScroll();
 }
 
@@ -4209,7 +4214,7 @@ document.addEventListener('visibilitychange', () => {
 
 </script>
 <!-- ── Auth / Sync overlay ── -->
-<div id="auth-overlay" onclick="if(event.target===this)closeAuthModal()">
+<div id="auth-overlay" onclick="if(event.target===this && _authModalReady)closeAuthModal()">
   <div id="auth-dialog">
     <div id="auth-dhdr">
       <span id="auth-dhdr-title">Sign in to sync</span>
