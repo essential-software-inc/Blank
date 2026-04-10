@@ -4178,10 +4178,14 @@ async function syncSignOut() {
   if (!_syncClient) return;
   const panel = document.getElementById('sync-panel');
   if (panel) panel.classList.remove('open');
+  // Kill the stale outside-click listener that would otherwise eat the first
+  // click on the auth overlay after the user tries to sign back in.
+  document.removeEventListener('click', _closeSyncPanelOutside, { capture: true });
   _syncUser = null;
   _setSyncStatus('idle');
   await _syncClient.auth.signOut();
   localStorage.removeItem('wpSyncPushedAt');
+  window.location.reload();
 }
 
 async function syncNow() {
