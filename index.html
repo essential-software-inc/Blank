@@ -3927,13 +3927,14 @@ async function pushToCloud() {
   if (!_syncClient || !_syncUser) return;
   _setSyncStatus('syncing');
   try {
-    // Pull first so we merge remote-only changes before overwriting
     await pullFromCloud(true);
+    if (!_syncClient || !_syncUser) { _setSyncStatus('idle'); return; } // guard: user signed out mid-flight
     const payload = _getLocalPayload();
     const { error } = await _syncClient.from('wikipad_sync').upsert(
       { user_id: _syncUser.id, ...payload, updated_at: new Date().toISOString() },
       { onConflict: 'user_id' }
     );
+    if (!_syncUser) { _setSyncStatus('idle'); return; } // guard again after await
     if (error) {
       if (_isAuthError(error)) {
         const ok = await _refreshSessionOrPrompt();
@@ -3944,6 +3945,7 @@ async function pushToCloud() {
     localStorage.setItem('wpSyncPushedAt', Date.now().toString());
     _setSyncStatus('synced');
   } catch(e) {
+    if (!_syncUser) { _setSyncStatus('idle'); return; } // don't show error if user signed out
     console.error('Push failed:', e);
     _setSyncStatus('error');
   }
@@ -4071,7 +4073,7 @@ function updateSyncUI() {
   const panelStatusText = document.getElementById('sync-panel-status-text');
   const syncIcons = {
     synced: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#36b37e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="6"/><polyline points="4,7 6,9.5 10,5"/></svg>`,
-    syncing: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f0a500" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="animation:sync-spin .9s linear infinite;transform-origin:center"><path d="M3 12a9 9 0 1 0 9-9 9 9 0 0 0-6.36 2.64L3 8"/><polyline points="3 3 3 8 8 8"/></svg>`,
+    syncing: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#f0a500" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="animation:sync-spin .9s linear infinite;transform-origin:7px 7px"><path d="M7 2a5 5 0 1 0 3.54 1.46"/><polyline points="10.5,0.5 10.5,3.5 7.5,3.5"/></svg>`,
     error: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#cc3333" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="6"/><line x1="7" y1="4.5" x2="7" y2="7.5"/><circle cx="7" cy="9.5" r=".6" fill="#cc3333"/></svg>`,
     idle: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#a2a9b1" stroke-width="1.8" stroke-linecap="round"><circle cx="7" cy="7" r="6"/><line x1="4.5" y1="7" x2="9.5" y2="7"/></svg>`
   };
@@ -4137,10 +4139,11 @@ async function syncSignOut() {
   if (!_syncClient) return;
   const panel = document.getElementById('sync-panel');
   if (panel) panel.classList.remove('open');
-  await _syncClient.auth.signOut();
-  _syncUser = null;
-  localStorage.removeItem('wpSyncPushedAt');
+  _syncUser = null; // null first so any in-flight push/pull sees it and bails
   _setSyncStatus('idle');
+  await _syncClient.auth.signOut();
+  localStorage.removeItem('wpSyncPushedAt');
+  _setSyncStatus('idle'); // force idle again after signOut resolves
 }
 
 async function syncNow() {
